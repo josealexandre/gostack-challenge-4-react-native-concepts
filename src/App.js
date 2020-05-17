@@ -24,15 +24,28 @@ export default function App() {
   }, [])
 
   async function handleLikeRepository(id) {
-    // Implement "Like Repository" functionality
+    const response = await api.post(`repositories/${id}/like`)
+
+    if (response.status !== 200) {
+      console.log('Erro ao curtir repositório')
+      return
+    }
+
+    const newRepositories = JSON.parse(JSON.stringify(repositories))
+    
+    newRepositories.forEach(repo => {
+      if (repo.id === id) {
+        repo.likes += 1
+      }
+    })
+    
+    setRepositories(newRepositories)
   }
 
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
       <SafeAreaView style={styles.container}>
-      {/* <View style={styles.repositoryContainer}> */}
-        {/* <Text>teste</Text> */}
         <FlatList 
           data={repositories}
           keyExtractor={repository => repository.id}
@@ -43,7 +56,7 @@ export default function App() {
 
                 <View style={styles.techsContainer}>                  
                   { repository.techs.map(tech => (
-                    <Text style={styles.tech}>
+                    <Text key={tech} style={styles.tech}>
                       { tech }
                     </Text>
                   )) }
@@ -60,15 +73,12 @@ export default function App() {
 
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => handleLikeRepository(1)}
-                  // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
+                  onPress={() => handleLikeRepository(repository.id)}                  
                   testID={`like-button-${repository.id}`}
                 >
                   <Text style={styles.buttonText}>Curtir</Text>
                 </TouchableOpacity>
-              </View>
-              
-              
+              </View>                            
             </>
           )}
         />      
